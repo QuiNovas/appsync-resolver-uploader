@@ -3,6 +3,7 @@ from __future__ import print_function
 import argparse
 import atexit
 import boto3
+import json
 import logging
 import sys
 
@@ -97,7 +98,7 @@ def main():
             requestMappingTemplate=request_mapping_template,
             responseMappingTemplate=response_mapping_template
         )
-        print('Resolver upload complete', response)
+        print('Resolver upload complete\n', json.dumps(response, indent=4, sort_keys=True))
     except KeyboardInterrupt:
         print('Service interrupted', file=sys.stderr)
     except Exception as e:
