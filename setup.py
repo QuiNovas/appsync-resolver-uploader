@@ -18,7 +18,7 @@ app_name = 'appsync-resolver-uploader'
 # Versions should comply with PEP440.  For a discussion on single-sourcing
 # the version across setup.py and the project code, see
 # https://packaging.python.org/en/latest/single_source_version.html
-app_version = '0.0.1'
+app_version = '0.0.2'
 
 app_description = 'Uploads request and response VTL templates for an API ID, type, field and datasource'
 
@@ -35,7 +35,7 @@ app_keywords = 'quinovas'
 # your project is installed. For an analysis of "install_requires" vs pip's
 # requirements files see:
 # https://packaging.python.org/en/latest/requirements.html
-app_install_requires = ['argparse', 'boto3']
+app_install_requires = ['argparse', 'boto3>=1.9.156']
 
 
 setup(
