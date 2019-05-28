@@ -44,7 +44,7 @@ def _parse_command_line_arguments():
     )
     argv_parser.add_argument(
         '--datasource-name',
-        help='The name of the AppSync data source for which the resolver is being created'
+        help='The name of the AppSync data source for which the resolver is being created - not used for pipeline resolvers'
     )
     argv_parser.add_argument(
         '--request-mapping-template',
@@ -53,6 +53,10 @@ def _parse_command_line_arguments():
     argv_parser.add_argument(
         '--response-mapping-template',
         help='The response mapping VTL file to upload'
+    )
+    argv_parser.add_argument(
+        '--pipeline-config',
+        help='The list of functions to use in this resolver - format is name,dataSourceName;name,dataSourceName'
     )
     return argv_parser.parse_args()
 
@@ -90,14 +94,35 @@ def main():
             action = appsync.create_resolver
         else:
             print('Found resolver, updating')
-        response = action(
-            apiId=args.api_id,
-            typeName=args.type_name,
-            fieldName=args.field_name,
-            dataSourceName=args.datasource_name,
-            requestMappingTemplate=request_mapping_template,
-            responseMappingTemplate=response_mapping_template
-        )
+        if args.pipeline_config:
+            function_ids = []
+            for function in [x for x in pipeline_config.split(';') if x]:
+                name, data_source_name = function.split(',')
+                function_id = _find_function(appsync, args.api_id, name, data_source_name)
+                if not function_id:
+                    raise ValueError('Function name {}, datasource {} not found'.format(name, data_source_name))
+                function_ids.append(function_id)
+            response = action(
+                apiId=args.api_id,
+                typeName=args.type_name,
+                fieldName=args.field_name,
+                requestMappingTemplate=request_mapping_template,
+                responseMappingTemplate=response_mapping_template,
+                kind='PIPELINE',
+                pipelineConfig={
+                    'functions': function_ids
+                }
+            )
+        else:
+            response = action(
+                apiId=args.api_id,
+                typeName=args.type_name,
+                fieldName=args.field_name,
+                dataSourceName=args.datasource_name,
+                requestMappingTemplate=request_mapping_template,
+                responseMappingTemplate=response_mapping_template,
+                kind='UNIT'
+            )
         print('Resolver upload complete\n', json.dumps(response, indent=4, sort_keys=True))
     except KeyboardInterrupt:
         print('Service interrupted', file=sys.stderr)
@@ -105,6 +130,27 @@ def main():
         print('Upload FAILED:', e.message, file=sys.stderr)
         print('')
         raise e
+
+
+def _find_function(appsync, api_id, name, data_source_name, next_token=None):
+    if next_token:
+        response = appsync.list_functions(
+            apiId=api_id,
+            nextToken=next_token
+        )
+    else:
+        response = appsync.list_functions(
+            apiId=api_id
+        )
+    function_id = None
+    if response['nextToken']:
+        function_id = _find_function(appsync, api_id, name, data_source_name, response['nextToken'])
+    for function in response['functions']:
+        if function['name'] == name and function['dataSourceName'] == data_source_name:
+            if function_id:
+                raise ValueError('Function name {}, dataSourceName {} tuple is not unique, unable to determine function'.format(name, data_source_name))
+            function_id = function['functionId']
+    return function_id
 
 
 if __name__ == '__main__':
