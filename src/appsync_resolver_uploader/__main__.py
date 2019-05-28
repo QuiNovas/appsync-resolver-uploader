@@ -96,7 +96,7 @@ def main():
             print('Found resolver, updating')
         if args.pipeline_config:
             function_ids = []
-            for function in [x for x in pipeline_config.split(';') if x]:
+            for function in [x for x in args.pipeline_config.split(';') if x]:
                 name, data_source_name = function.split(',')
                 function_id = _find_function(appsync, args.api_id, name, data_source_name)
                 if not function_id:
@@ -143,7 +143,7 @@ def _find_function(appsync, api_id, name, data_source_name, next_token=None):
             apiId=api_id
         )
     function_id = None
-    if response['nextToken']:
+    if 'nextToken' in response:
         function_id = _find_function(appsync, api_id, name, data_source_name, response['nextToken'])
     for function in response['functions']:
         if function['name'] == name and function['dataSourceName'] == data_source_name:

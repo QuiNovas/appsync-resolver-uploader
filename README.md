@@ -6,7 +6,7 @@ This is intended to be used in a CI/CD process for managing AppSync resolvers. M
 
 ### Usage
 ```
-python -m appsync_resolver_uploader --aws-access-key-id accesskey --aws-secret-access-key secret --aws_region region --api-id id --type-name type --field-name field --datasource-name datasource --request-mapping-template request.vtl --response-mapping-template response.vtl --pipeline-config name,datasource;name,datasource
+python -m appsync_resolver_uploader --aws-access-key-id accesskey --aws-secret-access-key secret --aws-region region --api-id id --type-name type --field-name field --datasource-name datasource --request-mapping-template request.vtl --response-mapping-template response.vtl --pipeline-config name,datasource;name,datasource
 ```
 
 ### Arguments
