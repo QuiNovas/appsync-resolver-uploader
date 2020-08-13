@@ -17,6 +17,6 @@ python -m appsync_resolver_uploader --aws-access-key-id accesskey --aws-secret-a
 - **type-name** The name of the GraphQL Type
 - **field-name** The name of the GraphQL field to attach the resolver to
 - **datasource-name** The name of the AppSync data source for which the resolver is being created - not used for pipeline resolvers
-- **request-mapping-template** The request mapping VTL file to upload
-- **response-mapping-template** The response mapping VTL file to upload
+- **request-mapping-template** The request mapping VTL file to upload - Optional if the datasource is a Lambda
+- **response-mapping-template** The response mapping VTL file to upload - Optional if the datasource is a Lambda
 - **pipeline-config** The list of functions to use in this resolver. Including this list changes the resolver to a pipeline
