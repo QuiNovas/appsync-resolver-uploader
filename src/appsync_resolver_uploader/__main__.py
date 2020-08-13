@@ -48,11 +48,11 @@ def _parse_command_line_arguments():
     )
     argv_parser.add_argument(
         '--request-mapping-template',
-        help='The request mapping VTL file to upload'
+        help='The request mapping VTL file to upload - Optional if the datasource is a Lamba'
     )
     argv_parser.add_argument(
         '--response-mapping-template',
-        help='The response mapping VTL file to upload'
+        help='The response mapping VTL file to upload - Optional if the datasource is a Lamba'
     )
     argv_parser.add_argument(
         '--pipeline-config',
@@ -69,10 +69,14 @@ def main():
         logging.getLogger('botocore').setLevel(logging.ERROR)
         logging.getLogger('boto3').setLevel(logging.ERROR)
 
-        with open(args.request_mapping_template) as vtl:
-            request_mapping_template = vtl.read()
-        with open(args.response_mapping_template) as vtl:
-            response_mapping_template = vtl.read()
+        request_mapping_template = None
+        response_mapping_template = None
+        if args.request_mapping_template:
+            with open(args.request_mapping_template) as vtl:
+                request_mapping_template = vtl.read()
+        if args.response_mapping_template:
+            with open(args.response_mapping_template) as vtl:
+                response_mapping_template = vtl.read()
 
         appsync = boto3.client(
             'appsync',
@@ -94,6 +98,11 @@ def main():
             action = appsync.create_resolver
         else:
             print('Found resolver, updating')
+        kwargs = {
+            'apiId': args.api_id,
+            'typeName': args.type_name,
+            'fieldName': args.field_name
+        }
         if args.pipeline_config:
             function_ids = []
             for function in [x for x in args.pipeline_config.split(';') if x]:
@@ -102,28 +111,23 @@ def main():
                 if not function_id:
                     raise ValueError('Function name {}, datasource {} not found'.format(name, data_source_name))
                 function_ids.append(function_id)
-            response = action(
-                apiId=args.api_id,
-                typeName=args.type_name,
-                fieldName=args.field_name,
-                requestMappingTemplate=request_mapping_template,
-                responseMappingTemplate=response_mapping_template,
-                kind='PIPELINE',
-                pipelineConfig={
-                    'functions': function_ids
-                }
-            )
+            if not (request_mapping_template and response_mapping_template):
+                raise ValueError('request-mapping-template and response-mapping-template are required for a pipeline resolver')
+            kwargs['requestMappingTemplate'] = request_mapping_template
+            kwargs['responseMappingTemplate'] = response_mapping_template
+            kwargs['kind'] = 'PIPELINE'
+            kwargs['pipelineConfig'] = {
+                'functions': function_ids
+            }
         else:
-            response = action(
-                apiId=args.api_id,
-                typeName=args.type_name,
-                fieldName=args.field_name,
-                dataSourceName=args.datasource_name,
-                requestMappingTemplate=request_mapping_template,
-                responseMappingTemplate=response_mapping_template,
-                kind='UNIT'
-            )
-        print('Resolver upload complete\n', json.dumps(response, indent=4, sort_keys=True))
+            kwargs['dataSourceName'] = args.datasource_name
+            kwargs['kind'] = 'UNIT'
+            if request_mapping_template and response_mapping_template:
+                kwargs['requestMappingTemplate'] = request_mapping_template
+                kwargs['responseMappingTemplate'] = response_mapping_template
+            elif request_mapping_template or response_mapping_template:
+                raise ValueError('request-mapping-template and response-mapping-template must either both be present or both be absent')
+        print('Resolver upload complete\n', json.dumps(action(**kwargs), indent=4, sort_keys=True))
     except KeyboardInterrupt:
         print('Service interrupted', file=sys.stderr)
     except Exception as e:

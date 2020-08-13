@@ -1,16 +1,6 @@
 import pypandoc
 
 from setuptools import setup, find_packages
-# To use a consistent encoding
-from codecs import open
-from os import path
-
-
-here = path.abspath(path.dirname(__file__))
-
-# Convert the README.md to README.rst
-with open('README.rst', 'w', encoding='utf-8') as readme:
-    readme.write(pypandoc.convert('README.md', 'rst', format='markdown'))
 
 # TODO: Change the following variables to match your app
 app_name = 'appsync-resolver-uploader'
@@ -18,9 +8,9 @@ app_name = 'appsync-resolver-uploader'
 # Versions should comply with PEP440.  For a discussion on single-sourcing
 # the version across setup.py and the project code, see
 # https://packaging.python.org/en/latest/single_source_version.html
-app_version = '0.0.2'
+app_version = '0.0.3'
 
-app_description = 'Uploads request and response VTL templates for an API ID, type, field and datasource'
+app_description = 'Creates or updates an AWS AppSync resolver'
 
 # How mature is this project? Common values are
 #   3 - Alpha
@@ -44,7 +34,7 @@ setup(
     version=app_version,
 
     description=app_description,
-    long_description=pypandoc.convert('README.md', 'rst', format='markdown'),
+    long_description=pypandoc.convert_file('README.md', 'rst', format='markdown'),
 
     url='https://github.com/QuiNovas/appsync-resolver-uploader',
 
@@ -71,6 +61,4 @@ setup(
 
     package_dir={'': 'src'},
     packages=find_packages('src'),
-
-    setup_requires=['pypandoc'],
 )
