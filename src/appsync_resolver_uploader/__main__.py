@@ -122,11 +122,11 @@ def main():
         else:
             kwargs['dataSourceName'] = args.datasource_name
             kwargs['kind'] = 'UNIT'
-            if request_mapping_template and response_mapping_template:
+            if request_mapping_template:
                 kwargs['requestMappingTemplate'] = request_mapping_template
+            if response_mapping_template:
                 kwargs['responseMappingTemplate'] = response_mapping_template
-            elif request_mapping_template or response_mapping_template:
-                raise ValueError('request-mapping-template and response-mapping-template must either both be present or both be absent')
+
         print('Resolver upload complete\n', json.dumps(action(**kwargs), indent=4, sort_keys=True))
     except KeyboardInterrupt:
         print('Service interrupted', file=sys.stderr)
