@@ -8,7 +8,7 @@ app_name = 'appsync-resolver-uploader'
 # Versions should comply with PEP440.  For a discussion on single-sourcing
 # the version across setup.py and the project code, see
 # https://packaging.python.org/en/latest/single_source_version.html
-app_version = '0.1.0'
+app_version = '1.0.0'
 
 app_description = 'Creates or updates an AWS AppSync resolver'
 
@@ -16,7 +16,7 @@ app_description = 'Creates or updates an AWS AppSync resolver'
 #   3 - Alpha
 #   4 - Beta
 #   5 - Production/Stable
-app_dev_status = '3 - Alpha'
+app_dev_status = '5 - Production/Stable'
 
 # What does your project relate to?
 app_keywords = 'quinovas'
